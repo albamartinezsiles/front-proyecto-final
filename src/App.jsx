@@ -23,7 +23,12 @@ function App() {
       return; 
     }
   
-    fetch('/tareas')
+    fetch('/tareas',{
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
       .then(respuesta => respuesta.json())
       .then(tareas => setTareas(tareas))
       .catch(error => console.error('Error al leer las tareas:', error));
