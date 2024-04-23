@@ -23,7 +23,7 @@ function App() {
       return; 
     }
   
-    fetch('/tareas',{
+    fetch('https://api-proyecto-final.onrender.com/tareas',{
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ function App() {
       .then(respuesta => respuesta.json())
       .then(tareas => setTareas(tareas))
       .catch(error => console.error('Error al leer las tareas:', error));
-  }, [tareas, editando]);
+  }, [editando]);
 
   return (
     <>
