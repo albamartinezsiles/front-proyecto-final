@@ -23,7 +23,7 @@ function App() {
       return; 
     }
   
-    fetch('http://localhost:4000/tareas')
+    fetch('https://api-proyecto-final.onrender.com/tareas')
       .then(respuesta => respuesta.json())
       .then(tareas => setTareas(tareas))
       .catch(error => console.error('Error al leer las tareas:', error));
@@ -34,7 +34,7 @@ function App() {
 
       <form onSubmit={(evento) => {
         evento.preventDefault();
-        fetch('http://localhost:4000/crear-tarea', {
+        fetch('https://api-proyecto-final.onrender.com/crear-tarea', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ function App() {
           onClick={async () => {
             if (editando && tarea === tareaEditada) {
               // Aquí va tu código para guardar los cambios
-              const respuesta = await fetch(`http://localhost:4000/tareas/editar/${tarea._id}`, {
+              const respuesta = await fetch(`https://api-proyecto-final.onrender.com/tareas/editar/${tarea._id}`, {
                 method: 'PUT',
                 headers: {
                   'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ function App() {
         
         <button className="boton"
         onClick={() => {
-          fetch(`http://localhost:4000/tareas/borrar/${tarea._id}`, {
+          fetch(`https://api-proyecto-final.onrender.com/tareas/borrar/${tarea._id}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ function App() {
           onClick={() => {
             const nuevoEstado = tarea.estado === 'pendiente' ? 'terminada' : 'pendiente';
 
-            fetch(`http://localhost:4000/tareas/estado/${tarea._id}`, {
+            fetch(`https://api-proyecto-final.onrender.com/tareas/estado/${tarea._id}`, {
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',
