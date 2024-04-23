@@ -23,7 +23,7 @@ function App() {
       return; 
     }
   
-    fetch('https://api-proyecto-final.onrender.com/tareas',{
+    fetch('/tareas',{
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
