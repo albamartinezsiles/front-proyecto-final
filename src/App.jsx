@@ -12,13 +12,13 @@ function App() {
   const [nuevaTarea, setNuevaTarea] = useState([]);
   const [tareas, setTareas] = useState([]);
   const [terminada, setTerminada] = useState(false);
-
   const [editando, setEditando] = useState(false);
   const [tareaEditada, setTareaEditada] = useState(null);
   const [textoEditado, setTextoEditado] = useState('');
 
 
   useEffect(() => {
+    //si estoy editando no recargues la lista de tareas
     if (editando) {
       return; 
     }
@@ -31,146 +31,185 @@ function App() {
     })
       .then(respuesta => respuesta.json())
       .then(tareas => setTareas(tareas))
-      .catch(error => console.error('Error al leer las tareas:', error));
-  }, [tareas, editando]);
+      .catch(console.error('Error al leer las tareas:'));
+  }, [tareas, editando]); //si cambia las tareas o si estoy editando, recarga la lista de tareas
+  //
 
   return (
     <>
-
-      <form onSubmit={(evento) => {
-        evento.preventDefault();
-        fetch('https://api-proyecto-final.onrender.com/crear-tarea', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          textoTarea : textoTarea, 
-          estado : estado,
-          editando: false,
-          })   
-      })
-      .then(respuesta => respuesta.json())
-      .then(tarea => {
-        setNuevaTarea(tareas => [...tareas, tarea]);
-        setTextoTarea('');
-        setEstado('pendiente');
-        setEditando(false);
-        console.log('Tarea enviada');
-    })
-    .catch(error => {
-        console.error('Error al enviar la tarea:', error);
-    })
-       
-    }}>
-
-      <input type="text" placeholder="¿qué hay que hacer?"
+      <form
+        onSubmit={(evento) => {
+          //vamos a crear una tarea
+          evento.preventDefault(); //evita que se recargue la pagina
+          fetch("https://api-proyecto-final.onrender.com/crear-tarea", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              textoTarea: textoTarea,
+              estado: estado,
+              editando: false,
+            }),
+            //traduce de json y obten la tarea con las propiedades de texto, el estado y si está editando. También trae el _id de cada tarea que genera mongo
+          })
+            .then((respuesta) => respuesta.json())
+            .then((tarea) => {
+              setNuevaTarea((tareas) => [...tareas, tarea]);
+              setTextoTarea("");
+              setEstado("pendiente");
+              setEditando(false);
+              console.log("Tarea enviada");
+            }) //agrega la tarea al array de tareas, deja el texto en blanco y el estado en pendiente. Tambien deja de editar. Con esto le damos valor a las variables
+            .catch(() => {
+              console.error("Error al enviar la tarea:");
+            });
+        }}
+      >
+        <input
+          type="text"
+          placeholder="¿qué hay que hacer?"
           value={textoTarea}
           onChange={(evento) => {
-              setTextoTarea(evento.target.value);
-              console.log(textoTarea);
+            setTextoTarea(evento.target.value);
+            //damos valor a la variable textoTarea con lo que escribimos en el input
           }}
-      />
-        <input type="submit" value="crear tarea" />
-    </form>
-
-    <section className="tareas">
-    
-    {tareas.map((tarea) => (
-      <div className="tarea" key={tarea._id}>
-        <h2 className={editando && tarea === tareaEditada ? "" : "visible"}>{tarea.textoTarea}</h2>
-        <input 
-          type="text" 
-          value={editando? textoEditado : tarea.textoTarea}
-          onChange={(evento) => setTextoEditado(evento.target.value)}
-          className={editando && tarea === tareaEditada ? "visible" : ""}
         />
-        <button className="boton"
-          onClick={async () => {
-            if (editando && tarea === tareaEditada) {
-              // Aquí va tu código para guardar los cambios
-              const respuesta = await fetch(`https://api-proyecto-final.onrender.com/tareas/editar/${tarea._id}`, {
-                method: 'PUT',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ textoTarea: textoEditado }),
-              });
-              if (respuesta.status === 200) {
-                setEditando(false);
-                setTareaEditada(null);
-                setTextoEditado('');
-                setTareas(tareas.map(listaTareas => {
-                  if (listaTareas._id === tarea._id) {
-                    return { ...listaTareas, textoTarea: textoEditado };
-                  } else {
-                    return listaTareas;
-                  }
-                }));
-              } else {
-                console.error('Error al guardar los cambios');
-              }
-            } else {
-              setEditando(true);
-              setTareaEditada(tarea);
-              setTextoEditado(tarea.textoTarea);
-            }
-          }}
-        >
-          {editando && tarea === tareaEditada ? 'Guardar' : 'Editar'}
-    </button>
-        
-        <button className="boton"
-        onClick={() => {
-          fetch(`https://api-proyecto-final.onrender.com/tareas/borrar/${tarea._id}`, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          })
-          .then(respuesta => respuesta.json())
-          .then(respuesta => {
-            if (respuesta.tareaborrada == "ok") {
-              setTareas(tareas.filter(listaTareas => listaTareas._id != tarea._id)); //borra la tarea del array si es distinto al id de la tarea que intentamos borrar
-              console.log('Tarea borrada con exito');
-            } else {
-              console.log('Error al borrar la tarea');
-            }
-          });
-  }}
-        >Borrar</button>
-        
-        <button className={`estado ${tarea.estado == 'terminada' ? 'terminada' : ''}`}
-          onClick={() => {
-            const nuevoEstado = tarea.estado === 'pendiente' ? 'terminada' : 'pendiente';
+        <input type="submit" value="crear tarea" />
+      </form>
 
-            fetch(`https://api-proyecto-final.onrender.com/tareas/estado/${tarea._id}`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ 
-                estado: nuevoEstado
-              })
-            })
-            .then(respuesta => respuesta.json())
-            .then(respuesta => {
-                console.log(respuesta.estadoModificado);
-                // Actualiza el estado de la tarea en el front-end
-                setTareas(tareas => tareas.map(eachTarea => {
-                    if (eachTarea._id === tarea._id) {
-                        return { ...eachTarea, estado: nuevoEstado };
+      <section className="tareas">
+        {tareas.map((tarea) => (
+          <div className="tarea" key={tarea._id}>
+          {
+            /* React necesita el id de cada tarea, asi que se lo ofrecemos accediendo a tarea._id */
+          }
+            <h2 className={editando ? "" : "visible"}>
+              {tarea.textoTarea }
+            </h2>
+            <input
+              type="text"
+              value={editando ? textoEditado : tarea.textoTarea /* Si estamos editando ponle a texto editado el textoTarea, es decir, el escrito en el input*/}
+              onChange={(evento) => setTextoEditado(evento.target.value) /* Si cambia el texto del input, cambia el texto editado*/}
+              className={editando && tarea === tareaEditada ? "visible" : ""}
+            />
+            <button
+              className="boton"
+              onClick={async () => {
+                if (editando && tarea === tareaEditada) {
+                 //si estamos editando y la tarea es la tarea editada, entonces guarda los cambios. Aqui vamos a editar el texto de la tarea 
+                //guardo la respuesta de la api en una variable para poder usarla más adelante si la respuesta es correcta (status 200)
+                  const respuesta = await fetch(
+                    `https://api-proyecto-final.onrender.com/tareas/editar/${tarea._id}`,
+                    {
+                      method: "PUT",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({ textoTarea: textoEditado }),
                     }
-                    return eachTarea;
-                }));
-                        });
-                      }}
-        ><span></span></button>
-      </div>
-  ))}
-</section>
+                  );
+                  if (respuesta.status === 200) {
+                    setEditando(false);
+                    setTareaEditada(null);
+                    setTextoEditado("");
+                    setTareas(
+                      tareas.map((listaTareas) => {
+                        if (listaTareas._id === tarea._id) {
+                          return { ...listaTareas, textoTarea: textoEditado };
+                        } else {
+                          return listaTareas;
+                        }
+                      })
+                    );
+                  } else {
+                    console.error("Error al guardar los cambios");
+                  }
+                } else {
+                  setEditando(true);
+                  setTareaEditada(tarea);
+                  setTextoEditado(tarea.textoTarea);
+                }
+              }}
+            >
+              {editando && tarea === tareaEditada ? "Guardar" : "Editar"}
+            </button>
+
+            <button
+              className="boton"
+              onClick={() => {
+                fetch(
+                  `https://api-proyecto-final.onrender.com/tareas/borrar/${tarea._id}`,
+                  {
+                    method: "DELETE",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                  }
+                )
+                  .then((respuesta) => respuesta.json())
+                  .then((respuesta) => {
+                    if (respuesta.tareaborrada == "ok") {
+                      setTareas(
+                        tareas.filter(
+                          (listaTareas) => listaTareas._id != tarea._id
+                        )
+                      ); //borra la tarea del array si es distinto al id de la tarea que intentamos borrar
+                      console.log("Tarea borrada con exito");
+                    } else {
+                      console.log("Error al borrar la tarea");
+                    }
+                  });
+              }}
+            >
+              Borrar
+            </button>
+
+            <button
+              className={`estado ${
+                tarea.estado == "terminada" ? "terminada" : ""
+              }`}
+              onClick={() => {
+                const nuevoEstado =
+                  tarea.estado === "pendiente" ? "terminada" : "pendiente";
+                  //Aquí hacemos un switch para cambiar el estado de la tarea
+                fetch(
+                  `https://api-proyecto-final.onrender.com/tareas/estado/${tarea._id}`,
+                  {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      estado: nuevoEstado,
+                      //el estado se guarda en la variable nuevoEstado
+                    }),
+                  }
+                )
+                  .then((respuesta) => respuesta.json())
+                  .then((respuesta) => {
+                    console.log(respuesta.estadoModificado);
+                    // Actualizamos el front
+                    setTareas((tareas) =>
+                      tareas.map((eachTarea) => {
+                        if (eachTarea._id === tarea._id) {
+                          // En el bucle,si coincide la tarea de la lista con la que queremos editar, devolvemos la tarea con el nuevo estado
+                          return { ...eachTarea, estado: nuevoEstado };
+                        }
+                        // Si no coincide, devolvemos la tarea sin modificar
+                        return eachTarea;
+                      })
+                    );
+                  });
+              }}
+            >
+              <span></span>
+            </button>
+          </div>
+        ))}
+      </section>
     </>
-  )
+  );
 }
 
 export default App
