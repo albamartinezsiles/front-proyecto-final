@@ -85,13 +85,13 @@ function App() {
             /* React necesita el id de cada tarea, asi que se lo ofrecemos accediendo a tarea._id */
           }
             <h2 className={editando ? "" : "visible"}>
-              {tarea.textoTarea }
+              {tarea.textoTarea} {/* Si no estamos editando, muestra el texto de la tarea */}
             </h2>
             <input
               type="text"
               value={editando ? textoEditado : tarea.textoTarea /* Si estamos editando ponle a texto editado el textoTarea, es decir, el escrito en el input*/}
               onChange={(evento) => setTextoEditado(evento.target.value) /* Si cambia el texto del input, cambia el texto editado*/}
-              className={editando && tarea === tareaEditada ? "visible" : ""}
+              className={editando && tarea === tareaEditada ? "visible" : ""} //Si estamos editando y la tarea es la tarea editada, muestra el input (tarea editada es null al principio y se cambia cuando editamos una tarea)
             />
             <button
               className="boton"
@@ -116,9 +116,9 @@ function App() {
                     setTareas(
                       tareas.map((listaTareas) => {
                         if (listaTareas._id === tarea._id) {
-                          return { ...listaTareas, textoTarea: textoEditado };
+                          return { ...listaTareas, textoTarea: textoEditado }; //cuando coincida la tarea de la lista con la tarea que queremos editar, devolvemos la tarea con el texto editado
                         } else {
-                          return listaTareas;
+                          return listaTareas; //si no coincide, devolvemos la tarea sin modificar
                         }
                       })
                     );
@@ -130,9 +130,11 @@ function App() {
                   setTareaEditada(tarea);
                   setTextoEditado(tarea.textoTarea);
                 }
+                //si no estamos editando, entonces vamos a editar la tarea. Le damos el valor true a editando, cambiamos el valor de tareaEditada a la tarea que queremos editar y el texto editado al texto de la tarea
               }}
             >
               {editando && tarea === tareaEditada ? "Guardar" : "Editar"}
+              {/* Si estamos editando y la tarea es la tarea editada, muestra guardar, si no, muestra editar */}
             </button>
 
             <button
@@ -149,10 +151,10 @@ function App() {
                 )
                   .then((respuesta) => respuesta.json())
                   .then((respuesta) => {
-                    if (respuesta.tareaborrada == "ok") {
-                      setTareas(
-                        tareas.filter(
-                          (listaTareas) => listaTareas._id != tarea._id
+                    if (respuesta.tareaborrada == "ok") { //si la respuesta es correcta, borra la tarea
+                      setTareas( //actualizamos el front usando el useState
+                        tareas.filter( //filtramos las tareas para que no aparezca la tarea que hemos borrado
+                          (listaTareas) => listaTareas._id != tarea._id 
                         )
                       ); //borra la tarea del array si es distinto al id de la tarea que intentamos borrar
                       console.log("Tarea borrada con exito");
@@ -167,12 +169,12 @@ function App() {
 
             <button
               className={`estado ${
-                tarea.estado == "terminada" ? "terminada" : ""
+                tarea.estado == "terminada" ? "terminada" : "" //si el estado de la tarea es terminada, añade la clase terminada
               }`}
               onClick={() => {
                 const nuevoEstado =
-                  tarea.estado === "pendiente" ? "terminada" : "pendiente";
-                  //Aquí hacemos un switch para cambiar el estado de la tarea
+                  tarea.estado === "pendiente" ? "terminada" : "pendiente"; //si el estado de la tarea es pendiente, cambialo a terminada, si no, cambialo a pendiente
+                  // hacemos un switch para cambiar el estado de la tarea
                 fetch(
                   `https://api-proyecto-final.onrender.com/tareas/estado/${tarea._id}`,
                   {
@@ -189,14 +191,14 @@ function App() {
                   .then((respuesta) => respuesta.json())
                   .then((respuesta) => {
                     console.log(respuesta.estadoModificado);
-                    // Actualizamos el front
-                    setTareas((tareas) =>
-                      tareas.map((eachTarea) => {
+                    // actualizamos el front
+                    setTareas((tareas) => //actualizamos las tareas usando el useState
+                      tareas.map((eachTarea) => { //recorremos las tareas
                         if (eachTarea._id === tarea._id) {
-                          // En el bucle,si coincide la tarea de la lista con la que queremos editar, devolvemos la tarea con el nuevo estado
+                          // en el bucle,si coincide la tarea de la lista con la que queremos editar, devolvemos la tarea con el nuevo estado
                           return { ...eachTarea, estado: nuevoEstado };
                         }
-                        // Si no coincide, devolvemos la tarea sin modificar
+                        // si no coincide, devolvemos la tarea sin modificar
                         return eachTarea;
                       })
                     );
