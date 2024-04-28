@@ -1,11 +1,10 @@
 import { useState,useEffect } from 'react'
-//import reactLogo from './assets/react.svg'
-//import viteLogo from '/vite.svg'
 import './estilos.css'
 
 
-//quiero que cree una tarea y que la mande al back. Luego veo como la pinto
 function App() {
+
+  //creamos los useState para las variables que vamos a usar
 
   const [textoTarea, setTextoTarea] = useState('')
   const [estado, setEstado] = useState('');
@@ -16,7 +15,7 @@ function App() {
   const [tareaEditada, setTareaEditada] = useState(null);
   const [textoEditado, setTextoEditado] = useState('');
 
-
+  //llamada a la api
   useEffect(() => {
     //si estoy editando no recargues la lista de tareas
     if (editando) {
@@ -33,7 +32,6 @@ function App() {
       .then(tareas => setTareas(tareas))
       .catch(console.error('Error al leer las tareas:'));
   }, [tareas, editando]); //si cambia las tareas o si estoy editando, recarga la lista de tareas
-  //
 
   return (
     <>
@@ -130,11 +128,11 @@ function App() {
                   setTareaEditada(tarea);
                   setTextoEditado(tarea.textoTarea);
                 }
-                //si no estamos editando, entonces vamos a editar la tarea. Le damos el valor true a editando, cambiamos el valor de tareaEditada a la tarea que queremos editar y el texto editado al texto de la tarea
+                //si no estamos editando, entonces vamos a editar la tarea. Le damos el valor true a editando, cambiamos el valor de tareaEditada a la tarea que queremos editar y el texto editado al texto de la tarea. En otras palabras, un toggle.
               }}
             >
               {editando && tarea === tareaEditada ? "Guardar" : "Editar"}
-              {/* Si estamos editando y la tarea es la tarea editada, muestra guardar, si no, muestra editar */}
+              {/* si estamos editando y la tarea es la tarea editada, muestra guardar, si no, muestra editar */}
             </button>
 
             <button
